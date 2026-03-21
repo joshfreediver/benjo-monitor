@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.5</title>
+    <title>Benjo's Slim Monitor v17.6</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -221,10 +221,12 @@
     }
     document.addEventListener('click', initAudio, { once: true });
 
+    function getETDate() {
+        return new Date().toLocaleDateString("en-US", {timeZone: "America/New_York", month: 'long', day: 'numeric', year: 'numeric'});
+    }
+
     function copyAttendance() {
-        // Get ET Date
-        const etDateStr = new Date().toLocaleDateString("en-US", {timeZone: "America/New_York", month: 'long', day: 'numeric', year: 'numeric'});
-        
+        const etDateStr = getETDate();
         const attendanceText = `Attendance:
 Shift date: ${etDateStr}
  
@@ -238,8 +240,6 @@ Time In 9AM`;
             const btn = document.querySelector('.sl-green');
             btn.innerText = "✓";
             setTimeout(() => btn.innerText = "+", 2000);
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
         });
     }
 
@@ -369,8 +369,15 @@ Time In 9AM`;
         initAudio();
 
         if (index === 2) {
+            // End Shift logic: Speak and Copy to Clipboard
             const msg = new SpeechSynthesisUtterance("Good job today, Benjo! Don't forget to screenshot Hub Staff.");
             window.speechSynthesis.speak(msg);
+
+            const etDateStr = getETDate();
+            const signOffText = `Good night!
+${etDateStr} 
+Time out 6PM`;
+            navigator.clipboard.writeText(signOffText);
         } else if (minutes > 0) {
             const breakName = (index === 0) ? "1st break" : "2nd break";
             const msg = new SpeechSynthesisUtterance("Enjoy your " + breakName + ", Benjo. Timer started.");
