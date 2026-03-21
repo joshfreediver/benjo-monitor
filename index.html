@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.3</title>
+    <title>Benjo's Slim Monitor v17.4</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -33,6 +33,7 @@
         .sl-red { background: #ff5f56; }
         .sl-red:hover { color: rgba(0,0,0,0.5); }
         .sl-yellow { background: #ffbd2e; }
+        .sl-yellow:hover { color: rgba(0,0,0,0.5); }
         .sl-green { background: #27c93f; cursor: default; }
         
         .top-section { 
@@ -140,7 +141,7 @@
     <div class="dashboard">
         <header class="macos-header">
             <button class="stoplight sl-red" onclick="location.reload()" title="Reload App">×</button>
-            <button class="stoplight sl-yellow" title="Minimize" tabindex="-1"></button>
+            <button class="stoplight sl-yellow" onclick="resetTickets()" title="Reset Counter">−</button>
             <button class="stoplight sl-green" title="Maximize" tabindex="-1"></button>
         </header>
 
@@ -149,8 +150,7 @@
             <div class="ph-date" id="date">Loading...</div>
             
             <div class="ticket-counter">
-                <span class="tc-label">Closed</span>
-                <button class="stoplight sl-yellow" onclick="resetTickets()" title="Reset Counter" style="cursor:pointer"></button>
+                <span class="tc-label">Closed Tickets</span>
                 <button class="tc-btn" onclick="updateTickets(-1)">-</button>
                 <div class="tc-count" id="ticket-count">0</div>
                 <button class="tc-btn" onclick="updateTickets(1)">+</button>
@@ -375,7 +375,6 @@
         if (index === 0 || index === 1) {
             const msg = new SpeechSynthesisUtterance("Welcome back Benjo! Please don't forget to start Hubstaff.");
             window.speechSynthesis.speak(msg);
-            // HIDE CARD ONCE BREAK IS DONE
             card.style.display = 'none';
         }
     }
