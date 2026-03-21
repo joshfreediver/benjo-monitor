@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v16.0</title>
+    <title>Benjo's Slim Monitor v17.3</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -32,7 +32,7 @@
         .stoplight { width: 12px; height: 12px; border-radius: 50%; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; font-weight: bold; transition: color 0.2s; }
         .sl-red { background: #ff5f56; }
         .sl-red:hover { color: rgba(0,0,0,0.5); }
-        .sl-yellow { background: #ffbd2e; cursor: default; }
+        .sl-yellow { background: #ffbd2e; }
         .sl-green { background: #27c93f; cursor: default; }
         
         .top-section { 
@@ -67,7 +67,6 @@
             color: white; border-radius: 8px; padding: 8px; outline: none; font-size: 14px; min-width: 0;
         }
 
-        /* --- EMBOSSED OVAL TOGGLE --- */
         .toggle-container {
             display: flex; align-items: center; 
             background: rgba(120, 120, 128, 0.4); 
@@ -118,6 +117,7 @@
             background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 18px; padding: 15px; text-align: center; 
             display: flex; flex-direction: column; align-items: center;
+            transition: opacity 0.5s ease;
         }
 
         .label-input { background: transparent; border: none; color: #ffffff; font-size: 18px; text-align: center; width: 100%; font-weight: 800; text-transform: uppercase; outline: none; margin-bottom: 5px; }
@@ -150,6 +150,7 @@
             
             <div class="ticket-counter">
                 <span class="tc-label">Closed</span>
+                <button class="stoplight sl-yellow" onclick="resetTickets()" title="Reset Counter" style="cursor:pointer"></button>
                 <button class="tc-btn" onclick="updateTickets(-1)">-</button>
                 <div class="tc-count" id="ticket-count">0</div>
                 <button class="tc-btn" onclick="updateTickets(1)">+</button>
@@ -213,20 +214,28 @@
     let audioCtx = null;
     let ticketsClosed = 0;
 
-    // AUDIO INIT
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
     document.addEventListener('click', initAudio, { once: true });
 
-    // STORAGE HANDLERS
     function updateTickets(change) {
         ticketsClosed = Math.max(0, ticketsClosed + change);
         document.getElementById('ticket-count').innerText = ticketsClosed;
         try {
             localStorage.setItem('ticketsClosed', ticketsClosed.toString());
         } catch(e) { console.error("Could not save tickets", e); }
+    }
+
+    function resetTickets() {
+        if (confirm("Reset ticket counter to zero?")) {
+            ticketsClosed = 0;
+            document.getElementById('ticket-count').innerText = "0";
+            try {
+                localStorage.setItem('ticketsClosed', "0");
+            } catch(e) { console.error("Could not reset tickets", e); }
+        }
     }
 
     function saveTicketsToStorage() {
@@ -239,7 +248,6 @@
         } catch(e) { console.error("Could not save list", e); }
     }
 
-    // TICKET LOGIC
     function addLiveTicket() {
         const input = document.getElementById('tt-input');
         const toggle = document.getElementById('tt-duration-toggle');
@@ -311,7 +319,6 @@
         };
     }
 
-    // ALARM / UTILS
     function playSpecificBeeps(times) {
         initAudio();
         let c = 0;
@@ -335,9 +342,16 @@
     function handleStop(index, minutes) {
         document.getElementById(`card-${index}`).classList.remove('alarm-active');
         document.getElementById(`stop-${index}`).style.display = 'none';
+        
+        initAudio();
+
         if (index === 2) {
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("Good job today, Benjo! Don't forget to screenshot Hub Staff."));
+            const msg = new SpeechSynthesisUtterance("Good job today, Benjo! Don't forget to screenshot Hub Staff.");
+            window.speechSynthesis.speak(msg);
         } else if (minutes > 0) {
+            const breakName = (index === 0) ? "1st break" : "2nd break";
+            const msg = new SpeechSynthesisUtterance("Enjoy your " + breakName + ", Benjo. Timer started.");
+            window.speechSynthesis.speak(msg);
             startTimer(index, minutes * 60);
         }
     }
@@ -351,10 +365,19 @@
 
     function stopTimer(index) {
         delete activeTimers[index];
-        document.getElementById(`card-${index}`).classList.remove('alarm-active');
+        const card = document.getElementById(`card-${index}`);
+        card.classList.remove('alarm-active');
         document.getElementById(`timer-${index}`).style.display = 'none';
         document.getElementById(`count-${index}`).style.display = 'block';
         document.getElementById(`tstop-${index}`).style.display = 'none';
+        
+        initAudio();
+        if (index === 0 || index === 1) {
+            const msg = new SpeechSynthesisUtterance("Welcome back Benjo! Please don't forget to start Hubstaff.");
+            window.speechSynthesis.speak(msg);
+            // HIDE CARD ONCE BREAK IS DONE
+            card.style.display = 'none';
+        }
     }
 
     function updateClocks() {
@@ -414,33 +437,18 @@
         });
     }
 
-    // --- GOOGLE SITES FIX ON LOAD ---
     window.onload = () => {
         applyDefaults();
         updateClocks();
-
-        // Check for Storage availability
         try {
-            const testKey = '__test__';
-            localStorage.setItem(testKey, '1');
-            localStorage.removeItem(testKey);
-
-            // Load Counter
             const savedCount = localStorage.getItem('ticketsClosed');
             if (savedCount !== null) {
                 ticketsClosed = parseInt(savedCount);
                 document.getElementById('ticket-count').innerText = ticketsClosed;
             }
-
-            // Load Snoozed List
             const savedItems = JSON.parse(localStorage.getItem('snoozedTickets')) || [];
             savedItems.forEach(t => createTicketItem(t.num, t.expiry, false));
-            
-        } catch (e) {
-            // If storage fails, tell user about Chrome cookie settings
-            console.error("Storage Access Denied", e);
-            alert("Persistence Error: Please enable 'Third-party cookies' in browser settings to save tickets on Google Sites.");
-        }
+        } catch (e) { console.error("Storage Access Denied", e); }
     };
 </script>
 </body>
