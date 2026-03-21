@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.4</title>
+    <title>Benjo's Slim Monitor v17.5</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -34,7 +34,8 @@
         .sl-red:hover { color: rgba(0,0,0,0.5); }
         .sl-yellow { background: #ffbd2e; }
         .sl-yellow:hover { color: rgba(0,0,0,0.5); }
-        .sl-green { background: #27c93f; cursor: default; }
+        .sl-green { background: #27c93f; }
+        .sl-green:hover { color: rgba(0,0,0,0.5); }
         
         .top-section { 
             display: flex; flex-direction: column; align-items: center; 
@@ -142,7 +143,7 @@
         <header class="macos-header">
             <button class="stoplight sl-red" onclick="location.reload()" title="Reload App">×</button>
             <button class="stoplight sl-yellow" onclick="resetTickets()" title="Reset Counter">−</button>
-            <button class="stoplight sl-green" title="Maximize" tabindex="-1"></button>
+            <button class="stoplight sl-green" onclick="copyAttendance()" title="Copy Attendance">+</button>
         </header>
 
         <section class="top-section">
@@ -219,6 +220,28 @@
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
     document.addEventListener('click', initAudio, { once: true });
+
+    function copyAttendance() {
+        // Get ET Date
+        const etDateStr = new Date().toLocaleDateString("en-US", {timeZone: "America/New_York", month: 'long', day: 'numeric', year: 'numeric'});
+        
+        const attendanceText = `Attendance:
+Shift date: ${etDateStr}
+ 
+Name: Ben Joseph Barliso
+Logged in: 9:00 AM
+Good morning!
+${etDateStr} 
+Time In 9AM`;
+
+        navigator.clipboard.writeText(attendanceText).then(() => {
+            const btn = document.querySelector('.sl-green');
+            btn.innerText = "✓";
+            setTimeout(() => btn.innerText = "+", 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
 
     function updateTickets(change) {
         ticketsClosed = Math.max(0, ticketsClosed + change);
