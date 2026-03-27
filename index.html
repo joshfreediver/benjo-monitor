@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.6</title>
+    <title>Benjo's Slim Monitor v17.7</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -97,9 +97,9 @@
             font-size: 10px; font-weight: 800; color: #ffffff; z-index: 1; 
             padding: 0 8px; letter-spacing: 0.5px;
         }
-        .label-12h, .label-2h { transition: opacity 0.2s; }
+        .label-24h, .label-2h { transition: opacity 0.2s; }
         .toggle-checkbox:not(:checked) ~ .toggle-label .label-2h { opacity: 0.2; }
-        .toggle-checkbox:checked ~ .toggle-label .label-12h { opacity: 0.2; }
+        .toggle-checkbox:checked ~ .toggle-label .label-24h { opacity: 0.2; }
 
         .tt-add-btn { background: #34c759; border: none; color: white; border-radius: 8px; height: 32px; padding: 0 12px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
         
@@ -163,11 +163,11 @@
                     <div class="tt-input-group">
                         <input type="text" id="tt-input" class="tt-input" placeholder="Ticket #" onkeydown="if(event.key==='Enter') addLiveTicket()">
                         
-                        <label class="toggle-container" title="12H (Gray) vs 2H (Blue)">
+                        <label class="toggle-container" title="24H (Gray) vs 2H (Blue)">
                             <input type="checkbox" id="tt-duration-toggle" class="toggle-checkbox">
                             <div class="toggle-knob"></div>
                             <div class="toggle-label">
-                                <span class="label-12h">12H</span>
+                                <span class="label-24h">24H</span>
                                 <span class="label-2h">2H</span>
                             </div>
                         </label>
@@ -276,7 +276,8 @@ Time In 9AM`;
         const toggle = document.getElementById('tt-duration-toggle');
         const num = input.value.trim();
         if(!num) return;
-        const hours = toggle.checked ? 2 : 12;
+        // Default is 24 hours, Blue is 2 hours
+        const hours = toggle.checked ? 2 : 24;
         const expiry = Date.now() + (hours * 60 * 60 * 1000);
         createTicketItem(num, expiry, true);
         input.value = '';
@@ -369,7 +370,6 @@ Time In 9AM`;
         initAudio();
 
         if (index === 2) {
-            // End Shift logic: Speak and Copy to Clipboard
             const msg = new SpeechSynthesisUtterance("Good job today, Benjo! Don't forget to screenshot Hub Staff.");
             window.speechSynthesis.speak(msg);
 
