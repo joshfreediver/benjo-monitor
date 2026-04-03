@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.7</title>
+    <title>Benjo's Slim Monitor v17.8</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -141,7 +141,7 @@
 <div class="dashboard-container">
     <div class="dashboard">
         <header class="macos-header">
-            <button class="stoplight sl-red" onclick="location.reload()" title="Reload App">×</button>
+            <button class="stoplight sl-red" onclick="shiftReset()" title="Shift Reset & Reload">×</button>
             <button class="stoplight sl-yellow" onclick="resetTickets()" title="Reset Counter">−</button>
             <button class="stoplight sl-green" onclick="copyAttendance()" title="Copy Attendance">+</button>
         </header>
@@ -225,6 +225,29 @@
         return new Date().toLocaleDateString("en-US", {timeZone: "America/New_York", month: 'long', day: 'numeric', year: 'numeric'});
     }
 
+    function shiftReset() {
+        const items = document.querySelectorAll('.tt-item');
+        let reportText = "Snoozed Tickets Report:\n";
+        
+        if (items.length === 0) {
+            reportText += "No tickets currently snoozed.";
+        } else {
+            items.forEach(item => {
+                const num = item.dataset.num;
+                const timerText = item.querySelector('.tt-item-timer').innerText;
+                reportText += `Ticket #${num} | Time Remaining: ${timerText}\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(reportText).then(() => {
+            alert("Shift report copied to clipboard. Resetting now...");
+            location.reload();
+        }).catch(err => {
+            console.error("Report copy failed", err);
+            location.reload();
+        });
+    }
+
     function copyAttendance() {
         const etDateStr = getETDate();
         const attendanceText = `Attendance:
@@ -276,7 +299,6 @@ Time In 9AM`;
         const toggle = document.getElementById('tt-duration-toggle');
         const num = input.value.trim();
         if(!num) return;
-        // Default is 24 hours, Blue is 2 hours
         const hours = toggle.checked ? 2 : 24;
         const expiry = Date.now() + (hours * 60 * 60 * 1000);
         createTicketItem(num, expiry, true);
