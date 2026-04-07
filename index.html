@@ -254,10 +254,10 @@
 Shift date: ${etDateStr}
  
 Name: Ben Joseph Barliso
-Logged in: 9:00 AM
+Logged in: 11:00 AM
 Good morning!
 ${etDateStr} 
-Time In 9AM`;
+Time In 11AM`;
 
         navigator.clipboard.writeText(attendanceText).then(() => {
             const btn = document.querySelector('.sl-green');
@@ -398,7 +398,7 @@ Time In 9AM`;
             const etDateStr = getETDate();
             const signOffText = `Good night!
 ${etDateStr} 
-Time out 6PM`;
+Time out 8PM`;
             navigator.clipboard.writeText(signOffText);
         } else if (minutes > 0) {
             const breakName = (index === 0) ? "1st break" : "2nd break";
