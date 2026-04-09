@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.8</title>
+    <title>Benjo's Slim Monitor v17.9</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -214,6 +214,7 @@
     let activeTimers = {}; 
     let audioCtx = null;
     let ticketsClosed = 0;
+    let ticketIntervals = {}; 
 
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -254,10 +255,10 @@
 Shift date: ${etDateStr}
  
 Name: Ben Joseph Barliso
-Logged in: 11:00 AM
+Logged in: 9:00 AM
 Good morning!
 ${etDateStr} 
-Time In 11AM`;
+Time In 9AM`;
 
         navigator.clipboard.writeText(attendanceText).then(() => {
             const btn = document.querySelector('.sl-green');
@@ -299,6 +300,14 @@ Time In 11AM`;
         const toggle = document.getElementById('tt-duration-toggle');
         const num = input.value.trim();
         if(!num) return;
+
+        // --- UNIQUE CHECK LOGIC ---
+        const existing = document.querySelector(`.tt-item[data-num="${num}"]`);
+        if (existing) {
+            if (ticketIntervals[num]) clearInterval(ticketIntervals[num]);
+            existing.remove();
+        }
+
         const hours = toggle.checked ? 2 : 24;
         const expiry = Date.now() + (hours * 60 * 60 * 1000);
         createTicketItem(num, expiry, true);
@@ -327,7 +336,7 @@ Time In 11AM`;
         const timerText = item.querySelector('.tt-item-timer');
         let beeped = false;
         
-        const tInterval = setInterval(() => {
+        ticketIntervals[num] = setInterval(() => {
             const diff = expiry - Date.now();
             if (diff <= 0) {
                 if (!beeped && isNew) { playSpecificBeeps(2); beeped = true; }
@@ -351,7 +360,8 @@ Time In 11AM`;
             } catch (err) { console.error('Copy failed', err); }
 
             if (item.classList.contains('alarm-active')) {
-                clearInterval(tInterval);
+                clearInterval(ticketIntervals[num]);
+                delete ticketIntervals[num];
                 item.remove();
                 saveTicketsToStorage();
             }
@@ -359,7 +369,8 @@ Time In 11AM`;
 
         closeBtn.onclick = (e) => {
             e.stopPropagation(); 
-            clearInterval(tInterval);
+            clearInterval(ticketIntervals[num]);
+            delete ticketIntervals[num];
             item.remove();
             saveTicketsToStorage();
         };
@@ -398,7 +409,7 @@ Time In 11AM`;
             const etDateStr = getETDate();
             const signOffText = `Good night!
 ${etDateStr} 
-Time out 8PM`;
+Time out 6PM`;
             navigator.clipboard.writeText(signOffText);
         } else if (minutes > 0) {
             const breakName = (index === 0) ? "1st break" : "2nd break";
@@ -483,7 +494,7 @@ Time out 8PM`;
             return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0, 16);
         };
         document.querySelectorAll('.time-picker').forEach((p, i) => { 
-            const defs = [setT(1, 30), setT(3, 30), setT(8, 0)];
+            const defs = [setT(0, 30), setT(3, 15), setT(6, 0)];
             if(!p.value) p.value = defs[i]; 
         });
     }
