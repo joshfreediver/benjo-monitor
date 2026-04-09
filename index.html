@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benjo's Slim Monitor v17.9</title>
+    <title>Benjo's Slim Monitor v18.0</title>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
@@ -301,7 +301,6 @@ Time In 9AM`;
         const num = input.value.trim();
         if(!num) return;
 
-        // --- UNIQUE CHECK LOGIC ---
         const existing = document.querySelector(`.tt-item[data-num="${num}"]`);
         if (existing) {
             if (ticketIntervals[num]) clearInterval(ticketIntervals[num]);
@@ -494,7 +493,8 @@ Time out 6PM`;
             return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0, 16);
         };
         document.querySelectorAll('.time-picker').forEach((p, i) => { 
-            const defs = [setT(0, 30), setT(3, 15), setT(6, 0)];
+            // UPDATED TIMES
+            const defs = [setT(1, 30), setT(3, 30), setT(8, 0)];
             if(!p.value) p.value = defs[i]; 
         });
     }
