@@ -493,7 +493,7 @@ Time out 9PM`;
             return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0, 16);
         };
         document.querySelectorAll('.time-picker').forEach((p, i) => { 
-            const defs = [setT(1, 30), setT(3, 30), setT(8, 0)];
+            const defs = [setT(3, 30), setT(5, 0), setT(9, 0)];
             if(!p.value) p.value = defs[i]; 
         });
     }
